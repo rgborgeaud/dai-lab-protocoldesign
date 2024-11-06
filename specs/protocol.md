@@ -5,23 +5,26 @@ This protocol is a client-server protocol. The client connects to a server and a
 This protocol uses TCP. The client establishes the connection. It has to know the server's ip address. The server listens on TCP port 9876. The client closes the connection when it doesn't need to use it anymore. 
 
 ##3. Messages :
+
 	*ASK <equation> : 
 		The client requests an answer. Possible operators include :
 			- +
 			- -
 			- *
 			- /
-			- ^
 		The server should also be able to consider parenthesis <()>
-
-	*EXIT : 
-		The client informs the server it doesn't need the connection anymore. The server closes the connection.
-
-	*UNKNOWN <char> :
-		The server doesn't recognize a character (either because it is a letter, an unused symbol etc...).
 	
 	*ERROR :
-		The equation has no solution, or a 0 division occurs.
+		The equation has no solution, a division by 0 occurs, the expression is malformed, a character is not recognized...
+		Multiple error messages should allow the client to determine which type of error occured.
+		- "E0" for a division by 0 error
+		- "E1" for malformed expression
+		- "E2" for unknown character
+
+	*RES :
+		Message used by the server to send the result. 
+
+	
 
 	All messages only use ASCII characters (I think). They all use '\n' as end-of-line character. 
 
@@ -34,10 +37,10 @@ This protocol uses TCP. The client establishes the connection. It has to know th
 ##5. Example dialogs : 
 
 	1. ASK 1 + 2 //->
-	2. <-// 3
+	2. <-// RES 3
 
 	1. ASK 25 / 0 //->
-	2. <-// ERROR 
+	2. <-// E0
 
 	1. ASK p!{l //->
-	2. UNKNOWN p
+	2. <-// E1
