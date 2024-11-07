@@ -14,7 +14,7 @@ public class ComputeExpression {
      */
     public ComputeExpression(String expression, String allowedOperators) {
 
-        this.allowedOperators = allowedOperators;
+        this.allowedOperators = allowedOperators + '(';
         this.result = compute(expression.replaceAll("\\s", ""));
     }
 
@@ -141,6 +141,9 @@ public class ComputeExpression {
                 //Check if unary operator is before expression as in -(1+2)
                 handleUnaryOperator(valStack, opStack);
 
+                if (opStack.peek() == '(') opStack.pop();
+                else throw new MalformedExpression("Parenthesis count not right");
+
             } else {
 
                 throw new IllegalCharacter("Illegal character : " + expression.charAt(i));
@@ -158,7 +161,7 @@ public class ComputeExpression {
     }
 
     public static void main(String[] args) {
-        String expression = "((((1+2)))";
+        String expression = "(1+2)";
         String ops = "+-*/";
 
         ComputeExpression ce = new ComputeExpression(expression, ops);

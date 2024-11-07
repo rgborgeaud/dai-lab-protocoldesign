@@ -16,7 +16,9 @@ public class Server {
     }
 
     private void run() {
+
         try (ServerSocket serverSocket = new ServerSocket(SERVER_PORT)) {
+
             while (true) {
 
                 try (Socket socket = serverSocket.accept();
@@ -33,28 +35,34 @@ public class Server {
 
                         String[] strArray = line.split("\\s+");
 
-                        switch (strArray[0]) {
-                            case COMPUTE_MESSAGE :
-                                try {
-                                    var res = new ComputeExpression(line.substring(4), SUPPORTED_OPERATIONS);
-                                    out.write("RES " + res + "\n");
-                                    out.flush();
-                                } catch (ArithmeticException e) {
-                                    out.write("E0\n");
-                                    out.flush();
-                                } catch (IllegalCharacter e) {
-                                    out.write("E1\n");
-                                    out.flush();
-                                } catch (MalformedExpression e) {
-                                    out.write("E2\n");
-                                    out.flush();
-                                }
-                                break;
+                        try {
 
-                            default :
-                                break;
+                            if (strArray[0].equals(COMPUTE_MESSAGE)) {
+
+                                var res = new ComputeExpression(line.substring(4), SUPPORTED_OPERATIONS);
+                                out.write("RES " + res + "\n");
+                                out.flush();
+                            }
+                            else {
+
+                                throw new MalformedExpression("Unrecognized instruction");
+                            }
+                        }
+
+                        catch (ArithmeticException e) {
+                                 out.write("E0\n");
+                                 out.flush();
+                        }
+                        catch (IllegalCharacter e) {
+                                 out.write("E1\n");
+                                 out.flush();
+                        }
+                        catch (MalformedExpression e) {
+                                 out.write("E2\n");
+                                 out.flush();
                         }
                     }
+
 
                 } catch (IOException e) {
                     System.out.println("Server: socket ex.: " + e);

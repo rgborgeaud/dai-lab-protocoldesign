@@ -29,9 +29,9 @@ public class Client {
                 System.out.println(line);
             }
 
-            while(!(line = sin.nextLine()).equals("q")) {
+            System.out.println("Please enter expression to compute or 'q' to quit");
 
-                System.out.println("Please enter expression to compute or 'q' to quit");
+            while(!(line = sin.nextLine()).equals("q")) {
 
                 out.write("ASK " + line + "\n");
                 out.flush();
