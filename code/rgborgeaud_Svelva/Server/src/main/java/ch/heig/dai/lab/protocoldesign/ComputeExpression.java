@@ -61,7 +61,7 @@ public class ComputeExpression {
      *         - Unrecognized character in expression
      *
      */
-    public String compute() {
+    public String compute() throws RuntimeException {
         // Let's initialize a value stack and an operand stack
         final Stack<Double> valStack = new Stack<>();
         final Stack<Character> opStack = new Stack<>();
@@ -143,7 +143,9 @@ public class ComputeExpression {
             }
         }
 
-        if (!opStack.empty() || valStack.size() != 1) throw new MalformedExpression("Bad expression");
+        if (!opStack.empty() || valStack.size() != 1) {
+            throw new MalformedExpression("Bad expression");
+        }
 
         return String.valueOf(valStack.pop());
     }
