@@ -2,7 +2,8 @@
 This protocol is a client-server protocol. The client connects to a server and asks the solution to a simple mathematical equation. The server then computes the answer and sends it to the client, or sends an error message. 
 
 ##2. Transport layer protocol :
-This protocol uses TCP. The client establishes the connection. It has to know the server's ip address. The server listens on TCP port 9876. The client closes the connection when it doesn't need to use it anymore. 
+This protocol uses TCP. The client establishes the connection. It has to know the server's ip address. The server listens on TCP port 9876. The client closes the connection on input of the quit token ('q' without quotes).
+Regarding the server, the design choice has been taken to have it shut down once all clients have disconnected, although this can be easily swapped around albeit this would require to implement server-side manual shutdown in the same fashion as the clients do (and a reply to all clients that the server is closing the connection).
 
 ##3. Messages :
 
@@ -12,27 +13,28 @@ This protocol uses TCP. The client establishes the connection. It has to know th
 			- -
 			- *
 			- /
-		The server should also be able to consider parenthesis <()>
-	
-	*ERROR :
-		The equation has no solution, a division by 0 occurs, the expression is malformed, a character is not recognized...
-		Multiple error messages should allow the client to determine which type of error occured.
-		- "E0" for a division by 0 error
-		- "E1" for malformed expression
-		- "E2" for unknown character
+		The server only accepts parenthesised inputs (e.g. (1+2*(3+3)))
+
+    *BYE :
+        Message used by the client to signal disconnection from it.
 
 	*RES :
 		Message used by the server to send the result. 
 
-	
+    *ERR :
+        The server replies with a message in case an exception got thrown during the processing
 
-	All messages only use ASCII characters (I think). They all use '\n' as end-of-line character. 
+
+	All messages use UTF-8 encoding, and '\n' as end-of-line character. 
 
 ##4. Error handling :
 
-	Only two kinds of errors are handled : 
-		* Input error : the client sends an unknown character or the expression doesn't conform to standard syntax.
-		* Mathematical errors : Either expression has no solution, or division by zero occurs. 
+	Errors are caught in a best-effort possible using general Exception clauses rather than
+    complicated specifics (which would not be required in scope of such a simple tool).
+    Computation errors from the server are replied and logged for the client in a user-friendly 
+    manner by a simple display of the exception's message.
+    Those errors are also logged in the server's console. Add to this, each entity's console log
+    their own specific issues (I/O errors for example).
 
 ##5. Example dialogs : 
 
@@ -40,7 +42,10 @@ This protocol uses TCP. The client establishes the connection. It has to know th
 	2. <-// RES 3
 
 	1. ASK 25 / 0 //->
-	2. <-// E0
+	2. <-// ERR : Division by 0
 
 	1. ASK p!{l //->
-	2. <-// E1
+	2. <-// ERR : Expression must be entirely enclosed in parentheses.
+
+    1. ASK (dgf) //->
+    2. <-// ERR : Unknown characters in expression
